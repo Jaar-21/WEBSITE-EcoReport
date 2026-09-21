@@ -1,0 +1,1753 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EcoReport - Laporkan Masalah Lingkungan di Kota Samarinda</title>
+  <meta name="description" content="Platform resmi pelaporan masalah lingkungan hidup berbasis lokasi untuk masyarakat Kota Samarinda, Kalimantan Timur. Laporkan. Petakan. Jaga Lingkungan.">
+  
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome untuk ikon sosial media -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+  <!-- CSS Utama -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ==================== NOTIFIKASI ==================== -->
+  <div id="toast" class="toast hidden" role="alert" aria-live="polite">
+    <div class="toast-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="16" x2="12" y2="12"></line>
+        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+      </svg>
+    </div>
+    <div class="toast-message" id="toastMessage">Notifikasi sistem</div>
+  </div>
+
+  <!-- ==================== NAVBAR PENGGUNA ==================== -->
+  <header class="navbar-header" id="userNavbar">
+    <div class="container navbar-container">
+      <!-- Brand Logo -->
+      <a class="brand-logo" onclick="bukaHalaman('beranda')" aria-label="Beranda EcoReport">
+        <!-- Logo situs dapat diganti melalui file img/EcoReportLogo.png -->
+        <div class="brand-logo-slot" id="navbarBrandLogoSlot">
+          <img src="img/EcoReportLogo.png" alt="Logo EcoReport" loading="eager">
+        </div>
+        <span class="brand-name">EcoReport</span>
+      </a>
+
+      <nav class="nav-links" id="navLinks" aria-label="Menu Utama">
+        <a class="nav-link active" data-nav="beranda" onclick="bukaHalaman('beranda')">Beranda</a>
+        <a class="nav-link" data-nav="peta" onclick="bukaHalaman('peta')">Peta Laporan</a>
+        <a class="nav-link" data-nav="buat-laporan" onclick="bukaHalaman('buat-laporan')">Buat Laporan</a>
+        <a class="nav-link" data-nav="laporan-saya" onclick="bukaHalaman('laporan-saya')">Laporan Saya</a>
+        <a class="nav-link" data-nav="tentang-kami" onclick="bukaHalaman('tentang-kami')">Tentang Kami</a>
+      </nav>
+
+      <!-- User Area: Autentikasi Pengguna & Petugas -->
+      <div class="navbar-user-area" id="navbarUserArea">
+        <!-- Keadaan Tamu (Belum Login) -->
+        <div id="navGuestBlock" style="display:flex; align-items:center; gap:8px;">
+          <button class="btn btn-outline-primary btn-sm" onclick="bukaHalaman('login')" style="font-size:0.85rem; padding:7px 16px; border-radius:var(--radius-full); display:inline-flex; align-items:center; gap:6px; font-weight:600;" title="Masuk atau Daftar Akun Pelapor / Petugas">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+              <polyline points="10 17 15 12 10 7"></polyline>
+              <line x1="15" y1="12" x2="3" y2="12"></line>
+            </svg>
+            <span>Masuk / Daftar</span>
+          </button>
+        </div>
+
+        <!-- Keadaan Sudah Login (Pelapor / Petugas) -->
+        <div id="navUserBlock" style="display:none; align-items:center; gap:10px;">
+          <div class="navbar-profile-pill" id="navProfilePill" onclick="bukaHalamanBerdasarkanSesi()">
+            <div class="user-avatar-small" id="navAvatar">U</div>
+            <div class="nav-user-info">
+              <span class="nav-user-name" id="navUserName">Pengguna</span>
+              <span class="nav-role-badge" id="navRoleBadge">Pelapor</span>
+            </div>
+          </div>
+          <button class="btn btn-sm btn-secondary" onclick="prosesLogout()" style="padding:6px 12px; font-size:0.8rem;" title="Keluar dari Akun">
+            Keluar
+          </button>
+        </div>
+
+        <!-- Mobile Hamburger Button -->
+        <button class="hamburger-btn" id="hamburgerBtn" aria-label="Buka Menu Navigasi" aria-expanded="false">
+          <span class="hamburger-bar"></span>
+          <span class="hamburger-bar"></span>
+          <span class="hamburger-bar"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Drawer -->
+    <div class="mobile-drawer" id="mobileDrawer">
+      <div class="mobile-drawer-content">
+        <a class="mobile-nav-link active" data-nav="beranda" onclick="bukaHalaman('beranda'); tutupMobileDrawer();">Beranda</a>
+        <a class="mobile-nav-link" data-nav="peta" onclick="bukaHalaman('peta'); tutupMobileDrawer();">Peta Laporan</a>
+        <a class="mobile-nav-link" data-nav="buat-laporan" onclick="bukaHalaman('buat-laporan'); tutupMobileDrawer();">Buat Laporan</a>
+        <a class="mobile-nav-link" data-nav="laporan-saya" onclick="bukaHalaman('laporan-saya'); tutupMobileDrawer();">Laporan Saya</a>
+        <a class="mobile-nav-link" data-nav="tentang-kami" onclick="bukaHalaman('tentang-kami'); tutupMobileDrawer();">Tentang Kami</a>
+        <div style="border-top:1px solid var(--color-border); margin:8px 0; padding-top:8px;">
+          <a class="mobile-nav-link" id="mobileAuthLink" onclick="bukaHalaman('login'); tutupMobileDrawer();" style="color: var(--color-primary); font-weight:700;">Masuk / Daftar Akun</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN VIEWS CONTAINER ==================== -->
+  <main id="appMain">
+
+    <!-- ==================== BERANDA ==================== -->
+    <div id="view-beranda" class="view-section active">
+      <!-- Hero Section -->
+      <section class="hero-section">
+        <div class="container hero-container">
+          <div class="hero-content">
+
+            <h1 class="hero-headline">
+              Laporkan Masalah<br>Lingkungan di<br>Sekitarmu
+            </h1>
+
+            <p class="hero-tagline">
+              “Laporkan. Petakan. Jaga Lingkungan.”
+            </p>
+
+            <p class="hero-description">
+              Platform pelaporan masalah lingkungan hidup khusus <strong>Kota Samarinda</strong>. Wujudkan aksi nyata bersama masyarakat demi Kota Samarinda yang bersih, sehat, dan asri.
+            </p>
+
+            <div class="hero-cta-group">
+              <button class="btn btn-primary" onclick="bukaHalaman('buat-laporan')">
+                <span>Buat Laporan Baru</span>
+              </button>
+              <button class="btn btn-secondary" onclick="bukaHalaman('peta')">
+                <span>Lihat Peta Interaktif</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Hero Graphic Tablet Mockup -->
+<div class="hero-visual">
+  <div class="hero-map-card">
+    <div class="hero-map-header">
+      <div class="mockup-city-tag">
+        <span class="pulse-indicator"></span>
+        <span>SAMARINDA</span>
+      </div>
+      <span class="hero-map-label">PETA LAPORAN</span>
+    </div>
+
+    <div id="heroMap"></div>
+  </div>
+</div>
+        </div>
+      </section>
+
+      <section class="statistics-section" aria-label="Statistik Pelaporan Lingkungan">
+        <div class="stats-curve-divider" aria-hidden="true">
+<svg viewBox="0 0 1440 80" preserveAspectRatio="none" fill="currentColor">
+  <path d="M0,0 C260,65 460,70 720,32 C980,-2 1200,65 1440,0 L1440,80 L0,80 Z"></path>
+</svg>
+        </div>
+
+        <div class="container">
+          <div class="stats-grid" id="statsContainer">
+            <div class="stat-item">
+              <div class="stat-number" id="beranda-terverifikasi">0</div>
+              <div class="stat-label">Laporan Terverifikasi</div>
+            </div>
+
+            <div class="stat-item">
+              <div class="stat-number" id="beranda-ditangani">0</div>
+              <div class="stat-label">Sedang Ditangani</div>
+            </div>
+
+            <div class="stat-item">
+              <div class="stat-number" id="beranda-selesai">0</div>
+              <div class="stat-label">Laporan Selesai</div>
+            </div>
+
+            <div class="stat-item">
+              <div class="stat-number" id="beranda-antrean">0</div>
+              <div class="stat-label">Dalam Antrean</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Cara Kerja EcoReport -->
+      <section class="section how-it-works-section" id="cara-kerja">
+        <div class="container">
+          <div class="section-header text-center">
+            <h2 class="section-title">Bagaimana Cara Kerja EcoReport?</h2>
+            <p class="section-subtitle">Alur pelaporan yang transparan dan terstruktur demi penanganan tepat sasaran di Kota Samarinda.</p>
+          </div>
+
+          <div class="steps-grid">
+            <div class="step-card">
+              <div class="step-badge">1</div>
+              <h3 class="step-title">Kirim Laporan</h3>
+              <p class="step-description">
+                Unggah foto kerusakan lingkungan beserta titik koordinat lokasi dan keterangan lengkap melalui formulir digital EcoReport.
+              </p>
+            </div>
+
+            <div class="step-card">
+              <div class="step-badge">2</div>
+              <h3 class="step-title">Verifikasi &amp; Petakan</h3>
+              <p class="step-description">
+                Tim verifikator DLH Samarinda memvalidasi laporan dan memetakan tingkat keparahan masalah pada sistem peta spasial publik.
+              </p>
+            </div>
+
+            <div class="step-card">
+              <div class="step-badge">3</div>
+              <h3 class="step-title">Tindak Lanjut</h3>
+              <p class="step-description">
+                Laporan diteruskan ke Dinas terkait (DLH, PUPR, BPBD Samarinda) untuk penanganan nyata di lapangan hingga tuntas.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Kategori Masalah Lingkungan (10 Kategori) -->
+      <section class="section categories-section" id="kategori">
+        <div class="container">
+          <div class="section-header text-center">
+            <h2 class="section-title">Kategori Masalah Lingkungan</h2>
+            <p class="section-subtitle">Jenis laporan masalah lingkungan yang dapat diajukan oleh masyarakat Kota Samarinda.</p>
+          </div>
+
+          <div class="categories-grid" id="kategoriGridContainer">
+            <!-- Populated via script.js -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Laporan Terbaru Terverifikasi-->
+      <section class="section latest-reports-section" id="laporan-terbaru">
+        <div class="container">
+          <div class="section-header text-center">
+            <h2 class="section-title">Laporan Terbaru Terverifikasi</h2>
+            <p class="section-subtitle">Berikut adalah bukti penanganan transparan dari berbagai titik laporan ekologis di Kota Samarinda.</p>
+          </div>
+
+          <div class="reports-grid" id="berandaLatestReports">
+            <!-- Populated via script.js -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Mengapa Pelaporan Penting? -->
+      <section class="section why-report-section">
+        <div class="container">
+          <div class="why-report-container">
+              <div class="why-report-visual">
+                <div class="eco-showcase-card">
+                
+
+                </div>
+              </div>
+
+            <div class="why-report-content">
+              <h2 class="section-title text-left">Mengapa Satu Laporan Anda Begitu Berharga?</h2>
+              <p style="font-size:1.02rem; color:var(--color-neutral-muted); margin-bottom:24px; line-height:1.65;">
+                Kerusakan lingkungan yang dibiarkan tanpa tindakan akan memicu bencana ekologis yang lebih besar seperti banjir luapan Sungai Mahakam, polusi udara, dan kerusakan sempadan sungai.
+              </p>
+
+              <ul class="why-report-list">
+                <li class="why-report-item">
+                  <span class="check-icon">✓</span>
+                  <span class="check-text"><strong>Mempercepat proses tanggap darurat</strong> dinas terkait (DLH & PUPR Samarinda).</span>
+                </li>
+                <li class="why-report-item">
+                  <span class="check-icon">✓</span>
+                  <span class="check-text"><strong>Mendukung transparansi pemetaan ekosistem</strong> di seluruh kecamatan Kota Samarinda.</span>
+                </li>
+                <li class="why-report-item">
+                  <span class="check-icon">✓</span>
+                  <span class="check-text"><strong>Meningkatkan kesadaran masyarakat sekitar</strong> untuk tidak membuang sampah sembarangan di sungai.</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Banner CTA -->
+      <section class="section cta-banner-section text-center" style="background:#FFFFFF;">
+        <div class="container">
+          <h2 class="section-title">Mari Jaga Bumi Kita Bersama</h2>
+          <p class="section-subtitle" style="margin-bottom:28px;">
+            Laporkan setiap kerusakan lingkungan di wilayah Kota Samarinda demi terwujudnya kota yang bersih, sehat, dan asri.
+          </p>
+          <button class="btn btn-primary btn-large" onclick="bukaHalaman('buat-laporan')">
+            <span>Mulai Kirim Laporan Sekarang</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <!-- ==================== LOGIN & REGISTRASI PELAPOR / PETUGAS ==================== -->
+    <div id="view-login" class="view-section">
+      <div class="auth-fullscreen-container">
+        <div class="auth-box-card">
+          <!-- Header Card -->
+          <div class="auth-header-block">
+            <h2 class="auth-title">Portal Akses EcoReport</h2>
+            <p class="auth-subtitle">Sistem Pemantauan dan Pengaduan Lingkungan Hidup Kota Samarinda</p>
+          </div>
+
+          <!-- Auth Mode Tab Switcher: Masuk vs Daftar Akun Pelapor -->
+          <div class="auth-tabs-nav">
+            <button type="button" class="auth-tab-item active" id="tabAuthLogin" onclick="gantiTabAuth('login')">
+              Masuk (Login)
+            </button>
+            <button type="button" class="auth-tab-item" id="tabAuthRegister" onclick="gantiTabAuth('register')">
+              Daftar Akun Pelapor
+            </button>
+          </div>
+
+          <!-- =================FORM MASUK (LOGIN) ================= -->
+          <div id="paneAuthLogin" class="auth-pane active">
+            <!-- Role  -->
+            <div class="auth-role-selector">
+              <button type="button" class="role-pill active" id="pillRolePelapor" onclick="pilihRoleLogin('pelapor')">
+                <span>Pelapor (Warga)</span>
+              </button>
+              <button type="button" class="role-pill" id="pillRolePetugas" onclick="pilihRoleLogin('petugas')">
+                <span>Petugas (DLH / OPD)</span>
+              </button>
+            </div>
+
+            <!-- Pesan Info Pelapor -->
+            <div id="infoLoginPelapor" class="auth-info-alert">
+              Masuk sebagai <strong>Pelapor</strong> untuk membuat pengaduan lingkungan baru dan memantau status laporan Anda di Kota Samarinda.
+            </div>
+            <!-- Pesan Info Petugas -->
+            <div id="infoLoginPetugas" class="auth-info-alert auth-info-petugas" style="display:none;">
+              Akses verifikator kedinasan resmi Pemkot Samarinda untuk memvalidasi dan menindaklanjuti laporan warga.
+            </div>
+
+            <!-- Form Login -->
+            <form id="formLoginUtama" onsubmit="event.preventDefault(); eksekusiLogin();">
+              <div class="form-group">
+                <label class="form-label" id="labelLoginEmail" for="inputLoginEmail">Email atau NIK Pelapor</label>
+                <input type="text" id="inputLoginEmail" class="form-input" placeholder="user@ecoreport.com atau 6472..." value="user@ecoreport.com" required>
+              </div>
+
+              <div class="form-group">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                  <label class="form-label" for="inputLoginPassword" style="margin-bottom:0;">Kata Sandi</label>
+                  <a href="#" style="font-size:0.78rem; color:var(--color-secondary); font-weight:600;" onclick="tampilkanToast('Gunakan sandi akun atau demo: password123 / admin123'); return false;">Lupa kata sandi?</a>
+                </div>
+                <input type="password" id="inputLoginPassword" class="form-input" value="password123" placeholder="••••••••••••" required>
+              </div>
+
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:18px; font-size:0.84rem; color:var(--color-neutral-muted);">
+                <input type="checkbox" id="ingatSesiLogin" checked>
+                <label for="ingatSesiLogin">Ingat saya di perangkat ini</label>
+              </div>
+
+              <button type="submit" class="btn btn-primary" style="width:100%; padding:12px; font-weight:700;">
+                <span id="btnTextLogin">Masuk Sebagai Pelapor</span>
+              </button>
+            </form>
+
+            <div class="auth-footer-link">
+              Belum memiliki akun pelapor? <a href="#" onclick="gantiTabAuth('register'); return false;">Daftar Akun Baru</a>
+            </div>
+          </div>
+
+          <!-- ================= FORM REGISTRASI AKUN PELAPOR ================= -->
+          <div id="paneAuthRegister" class="auth-pane" style="display:none;">
+            <!-- Badge Validasi & Kepercayaan -->
+            <div class="trust-verif-badge">
+              <div>
+                <strong style="display:block; margin-bottom:2px;">Akun Pelapor Terverifikasi</strong>
+                <span>Gunakan akun dengan NIK valid agar setiap aduan dapat diverifikasi oleh petugas.</span>
+              </div>
+            </div>
+
+            <form id="formRegisterPelapor" onsubmit="event.preventDefault(); eksekusiRegistrasiPelapor();">
+              <div class="form-group">
+                <label class="form-label" for="regNamaLengkap">Nama Lengkap (Sesuai KTP) *</label>
+                <input type="text" id="regNamaLengkap" class="form-input" placeholder="Masukkan nama lengkap Anda" required>
+              </div>
+
+              <div class="form-row-2col">
+                <div class="form-group">
+                  <label class="form-label" for="regNIK">NIK (16 Digit KTP) *</label>
+                  <input type="text" id="regNIK" class="form-input" placeholder="Contoh: 6472012903900004" maxlength="16" minlength="16" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="regTelepon">Nomor WhatsApp / HP *</label>
+                  <input type="tel" id="regTelepon" class="form-input" placeholder="081234567890" required>
+
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="regEmail">Email Aktif *</label>
+                <input type="email" id="regEmail" class="form-input" placeholder="nama@email.com" required>
+              </div>
+
+              <div class="form-row-2col">
+                <div class="form-group">
+                  <label class="form-label" for="regPassword">Kata Sandi *</label>
+                  <input type="password" id="regPassword" class="form-input" placeholder="Minimal 6 karakter" minlength="6" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="regPasswordKonfirm">Konfirmasi Sandi *</label>
+                  <input type="password" id="regPasswordKonfirm" class="form-input" placeholder="Ulangi kata sandi" minlength="6" required>
+                </div>
+              </div>
+
+              <div style="display:flex; align-items:flex-start; gap:10px; margin-bottom:18px; font-size:0.82rem; color:var(--color-neutral-muted); line-height:1.4;">
+                <input type="checkbox" id="regSetujuKetentuan" required style="margin-top:3px;">
+                <label for="regSetujuKetentuan">Saya menyatakan bahwa data yang saya masukkan adalah valid dan saya siap bertanggung jawab atas kebenaran laporan lingkungan yang diajukan.</label>
+              </div>
+
+              <button type="submit" class="btn btn-primary" style="width:100%; padding:12px; font-weight:700;">
+                <span>Daftar &amp; Buat Akun Pelapor</span>
+              </button>
+            </form>
+
+            <div class="auth-footer-link">
+              Sudah memiliki akun? <a href="#" onclick="gantiTabAuth('login'); return false;">Masuk ke Akun Anda</a>
+            </div>
+          </div>
+
+          <div style="margin-top:20px; text-align:center;">
+            <a href="#" onclick="bukaHalaman('beranda'); return false;" style="font-size:0.82rem; color:var(--color-neutral-muted);">
+              ← Kembali ke Beranda
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== PETA & STATUS SAMARINDA ==================== -->
+    <div id="view-peta" class="view-section">
+      <div class="container public-map-page-container">
+        
+        <!-- Header Halaman Peta & Status Publik -->
+        <div class="public-page-header">
+          <h1 class="public-page-title">Peta Spasial &amp; Status Laporan Lingkungan</h1>
+          <p class="public-page-sub">
+            Pantau sebaran titik laporan lingkungan di Kota Samarinda secara terbuka. Bagian peta Google Maps berada di atas, dan gulir ke bawah untuk memantau detail status penanganan laporan secara komprehensif.
+          </p>
+        </div>
+
+        <!-- ==================== GOOGLE MAPS  ==================== -->
+        <section class="google-map-wrapper" id="googleMapSection">
+          <div class="google-map-header">
+            <div class="map-section-title-wrap">
+              <div>
+                <h2 class="map-section-title">Peta Titik Spasial Samarinda</h2>
+                <div class="map-section-sub">Koordinat Pantau: Lat -0.502106, Lng 117.153709 (Pusat Kota Samarinda)</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="google-map-target" id="googleMapContainer">
+            <div id="petaPublikGisView" class="map-gis-view">
+              <!-- Placeholder Bersih (Tanpa Peta Dummy). Siap di-mount oleh google.maps.Map begitu API Key diisi -->
+              <div class="google-map-placeholder-clean" id="googleMapCleanPlaceholder">
+                <h3 class="map-ph-title">Section Google Maps API (Kota Samarinda)</h3>
+                <p class="map-ph-desc">
+                  Section peta ini telah disiapkan khusus untuk integrasi dengan <strong>Google Maps JavaScript API</strong>. Kontainer ini akan langsung memuat peta satelit/jalan resmi secara otomatis saat API Key disetel.
+                </p>
+                <div class="map-ph-info-box">
+                  <div class="map-ph-mount">ID Wadah Peta: <code>#petaPublikGisView</code></div>
+                  <div class="map-ph-guide">
+                    <strong>Panduan Integrasi:</strong> Masukkan Google Maps API Key Anda ke dalam variabel <code>GOOGLE_MAPS_API_KEY</code> di file <code>script.js</code> untuk mengaktifkan pemetaan interaktif.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="map-floating-popup" id="petaFloatingPopup" style="display:none;">
+              <div class="popup-header">
+                <span id="popupReportId" class="report-id">#ER-1024</span>
+                <span id="popupReportStatus" class="status-badge status-ditangani">Sedang Ditangani</span>
+                <button onclick="tutupPopupPeta()" style="font-size:1.1rem; color:var(--color-neutral-muted); padding:0 4px; background:none; border:none; cursor:pointer;">&times;</button>
+              </div>
+              <h3 class="popup-title" id="popupReportTitle">Penumpukan Limbah Plastik</h3>
+              <p class="popup-desc" id="popupReportDesc">Ditemukan tumpukan sampah menyumbat aliran air sungai.</p>
+              
+              <div class="popup-meta-item">
+                  <span><i class="fa-solid fa-location-dot"></i></span>
+                <span id="popupReportLocation">Samarinda Ulu, Kota Samarinda</span>
+              </div>
+              <div class="popup-meta-item">
+                <span><i class="fa-solid fa-building"></i></span>
+                <span id="popupReportAgency">Dinas Lingkungan Hidup (DLH) Samarinda</span>
+              </div>
+
+              <div class="popup-btn-row" style="margin-top:12px;">
+                <button class="btn btn-primary btn-sm" id="popupBtnDetail" style="width:100%;">Lihat Detail Laporan</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== DAFTAR STATUS LAPORAN PUBLIK SAMARINDA ==================== -->
+        <section class="public-reports-section" id="publicReportsSection">
+          <div class="section-title-row">
+            <div>
+              <h2 class="section-heading">Informasi Status Laporan di Kota Samarinda</h2>
+              <p class="section-subheading">Pantau tahapan tindak lanjut dari seluruh laporan warga yang telah diverifikasi dinas</p>
+            </div>
+            <div class="report-counter-badge" id="publicReportCounterBadge">
+               Laporan Terverifikasi
+            </div>
+          </div>
+
+          <div class="public-filter-card">
+            <div class="filter-controls-row">
+              <div class="filter-search-box">
+                <span class="search-icon">
+                  <i class="fa-solid fa-magnifying-glass"></i>
+                </span>
+                <input type="text" id="petaSearchInput" class="form-input" placeholder="Cari ID laporan, judul, atau jalan..." oninput="filterPetaPublik()">
+              </div>
+
+              <!-- Filter Kecamatan Samarinda -->
+        <div class="filter-select-box custom-dropdown" id="petaKecamatanDropdown">
+
+          <button type="button" class="custom-dropdown-toggle" onclick="togglePetaKecamatanDropdown()">
+            <span id="petaKecamatanSelected">Semua Kecamatan Samarinda</span>
+            <i class="fa-solid fa-chevron-down"></i>
+          </button>
+
+          <div class="custom-dropdown-menu" id="petaKecamatanMenu">
+
+            <div class="custom-dropdown-option active"
+                data-value="Semua"
+                onclick="pilihPetaKecamatan('Semua', 'Semua Kecamatan Samarinda')">
+              Semua Kecamatan Samarinda
+            </div>
+
+            <div class="custom-dropdown-option"
+                data-value="Samarinda Ulu"
+                onclick="pilihPetaKecamatan('Samarinda Ulu', 'Samarinda Ulu')">
+              Samarinda Ulu
+            </div>
+
+            <div class="custom-dropdown-option"
+                data-value="Samarinda Ilir"
+                onclick="pilihPetaKecamatan('Samarinda Ilir', 'Samarinda Ilir')">
+              Samarinda Ilir
+            </div>
+
+            <div class="custom-dropdown-option"
+                data-value="Samarinda Utara"
+                onclick="pilihPetaKecamatan('Samarinda Utara', 'Samarinda Utara')">
+              Samarinda Utara
+            </div>
+
+            <div class="custom-dropdown-option"
+                data-value="Samarinda Seberang"
+                onclick="pilihPetaKecamatan('Samarinda Seberang', 'Samarinda Seberang')">
+              Samarinda Seberang
+            </div>
+
+            <div class="custom-dropdown-option"
+                data-value="Samarinda Kota"
+                onclick="pilihPetaKecamatan('Samarinda Kota', 'Samarinda Kota')">
+              Samarinda Kota
+            </div>
+
+            <div class="custom-dropdown-option"
+                data-value="Samarinda Selatan"
+                onclick="pilihPetaKecamatan('Samarinda Selatan', 'Samarinda Selatan')">
+              Samarinda Selatan
+            </div>
+
+            <div class="custom-dropdown-option"
+                data-value="Sungai Kunjang"
+                onclick="pilihPetaKecamatan('Sungai Kunjang', 'Sungai Kunjang')">
+              Sungai Kunjang
+            </div>
+
+            <div class="custom-dropdown-option"
+                data-value="Sambutan"
+                onclick="pilihPetaKecamatan('Sambutan', 'Sambutan')">
+              Sambutan
+            </div>
+
+            <div class="custom-dropdown-option"
+                data-value="Palaran"
+                onclick="pilihPetaKecamatan('Palaran', 'Palaran')">
+              Palaran
+            </div>
+
+            <div class="custom-dropdown-option"
+                data-value="Loa Janan Ilir"
+                onclick="pilihPetaKecamatan('Loa Janan Ilir', 'Loa Janan Ilir')">
+              Loa Janan Ilir
+            </div>
+
+          </div>
+
+          <select id="petaKecamatanFilterSelect" style="display:none;">
+            <option value="Semua">Semua Kecamatan Samarinda</option>
+            <option value="Samarinda Ulu">Samarinda Ulu</option>
+            <option value="Samarinda Ilir">Samarinda Ilir</option>
+            <option value="Samarinda Utara">Samarinda Utara</option>
+            <option value="Samarinda Seberang">Samarinda Seberang</option>
+            <option value="Samarinda Kota">Samarinda Kota</option>
+            <option value="Samarinda Selatan">Samarinda Selatan</option>
+            <option value="Sungai Kunjang">Sungai Kunjang</option>
+            <option value="Sambutan">Sambutan</option>
+            <option value="Palaran">Palaran</option>
+            <option value="Loa Janan Ilir">Loa Janan Ilir</option>
+          </select>
+
+        </div>
+
+            <div class="filter-select-box custom-dropdown" id="petaKategoriDropdown">
+
+              <button type="button"
+                      class="custom-dropdown-toggle"
+                      onclick="togglePetaKategoriDropdown()">
+                <span id="petaKategoriSelected">Semua Kategori Masalah</span>
+                <i class="fa-solid fa-chevron-down"></i>
+              </button>
+
+              <div class="custom-dropdown-menu" id="petaKategoriMenu"></div>
+              <select id="petaKategoriFilterSelect" style="display:none;">
+                <option value="Semua">Semua Kategori Masalah</option>
+              </select>
+
+            </div>
+
+            <div class="filter-status-chips-bar">
+              <span class="chips-label">Status Penanganan:</span>
+              <div class="filter-chips-row" id="petaStatusFilterGroup">
+                <button class="filter-chip active" data-status="Semua" onclick="aturFilterPetaStatus('Semua')">Semua Status</button>
+                <button class="filter-chip" data-status="Terverifikasi" onclick="aturFilterPetaStatus('Terverifikasi')">Terverifikasi</button>
+                <button class="filter-chip" data-status="Sedang Ditangani" onclick="aturFilterPetaStatus('Sedang Ditangani')">Sedang Ditangani</button>
+                <button class="filter-chip" data-status="Selesai" onclick="aturFilterPetaStatus('Selesai')">Selesai</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="public-reports-grid" id="petaListLaporan"></div>
+        </section>
+
+      </div>
+    </div>
+
+    <!-- ==================== BUAT LAPORAN  ==================== -->
+    <div id="view-buat-laporan" class="view-section">
+      <div class="container">
+        <div class="form-page-container">
+          <h2 class="form-header-title">Formulir Pengaduan Lingkungan</h2>
+          <p class="form-header-sub">Silakan isi formulir resmi ini untuk mengajukan laporan pemantauan kelestarian di Kota Samarinda.</p>
+
+          <div class="stepper-nav">
+            <div class="step-item completed">
+              <div class="step-number">✓</div>
+              <span>Data Pelapor</span>
+            </div>
+            <div class="step-item active">
+              <div class="step-number">2</div>
+              <span>Kategori &amp; Detail</span>
+            </div>
+            <div class="step-item">
+              <div class="step-number">3</div>
+              <span>Lokasi &amp; Foto</span>
+            </div>
+            <div class="step-item">
+              <div class="step-number">4</div>
+              <span>Ringkasan</span>
+            </div>
+          </div>
+
+          <form id="formPengaduan" onsubmit="event.preventDefault(); kirimLaporanBaru();">
+            <div class="form-section-block">
+              <h3 class="form-section-title">1. Identitas Pelapor (Rahasia &amp; Terlindungi)</h3>
+              <div class="form-row-2col">
+                <div class="form-group">
+                  <label class="form-label" for="pelaporNama">Nama Lengkap *</label>
+                  <input type="text" id="pelaporNama" class="form-input" placeholder="Masukkan nama lengkap" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="pelaporNIK">NIK (16 Digit KTP) *</label>
+                  <input type="text" id="pelaporNIK" class="form-input" placeholder="Contoh: 6472012903900004" maxlength="16" required>
+                </div>
+              </div>
+
+              <div class="form-row-2col">
+                <div class="form-group">
+                  <label class="form-label" for="pelaporTelepon">Nomor HP / WhatsApp *</label>
+                  <input type="tel" id="pelaporTelepon" class="form-input" placeholder="081234567890" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="pelaporEmail">Email Aktif *</label>
+                  <input type="email" id="pelaporEmail" class="form-input" placeholder="nama@email.com" required>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section-block">
+              <h3 class="form-section-title">2. Kategori &amp; Deskripsi Laporan</h3>
+              
+              <div class="form-group">
+                <label class="form-label" for="laporanJudul">Judul Singkat Aduan *</label>
+                <input type="text" id="laporanJudul" class="form-input" placeholder="Contoh: Tumpukan Sampah Liar Dekat Pasar Pagi" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="laporanKategori">Jenis Masalah Lingkungan *</label>
+                <select id="laporanKategori" class="form-select" required>
+                  <option value="" disabled selected>Pilih Kategori Masalah...</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="laporanDeskripsi">Deskripsi Detail Kerusakan *</label>
+                <textarea id="laporanDeskripsi" class="form-textarea" rows="4" placeholder="Jelaskan kondisi di lokasi, jenis limbah/kerusakan, dan dampak terhadap warga sekitar..." required></textarea>
+              </div>
+            </div>
+
+            <div class="form-section-block">
+              <h3 class="form-section-title">3. Titik Lokasi &amp; Bukti Lapangan (Kota Samarinda)</h3>
+
+              <!-- Peringatan Validasi Wilayah Samarinda -->
+              <div id="samarindaWarningAlert" class="alert-samarinda-warning">
+                <span style="font-size:1.2rem;"><i class="fa-solid fa-triangle-exclamation"></i></span>
+                <span>Maaf, EcoReport saat ini hanya melayani laporan di wilayah Kota Samarinda. Silakan pilih titik lokasi di dalam batas Kota Samarinda.</span>
+              </div>
+
+              <div class="form-row-2col">
+                <div class="form-group">
+                  <label class="form-label">Latitude *</label>
+                  <input type="text" id="laporanLatitude" class="form-input" placeholder="-0.502106" readonly required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Longitude *</label>
+                  <input type="text" id="laporanLongitude" class="form-input" placeholder="117.153709" readonly required>
+                </div>
+              </div>
+
+              <div class="form-row-2col">
+                <div class="form-group">
+                  <label class="form-label" for="laporanKecamatan">Kecamatan di Samarinda *</label>
+                  <select id="laporanKecamatan" class="form-select" required>
+                    <option value="" disabled selected>Pilih Kecamatan...</option>
+                    <option value="Samarinda Ulu">Samarinda Ulu</option>
+                    <option value="Samarinda Ilir">Samarinda Ilir</option>
+                    <option value="Samarinda Utara">Samarinda Utara</option>
+                    <option value="Samarinda Seberang">Samarinda Seberang</option>
+                    <option value="Samarinda Kota">Samarinda Kota</option>
+                    <option value="Samarinda Selatan">Samarinda Selatan</option>
+                    <option value="Sungai Kunjang">Sungai Kunjang</option>
+                    <option value="Sambutan">Sambutan</option>
+                    <option value="Palaran">Palaran</option>
+                    <option value="Loa Janan Ilir">Loa Janan Ilir</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="laporanAlamat">Alamat Lengkap / Patokan *</label>
+                  <input type="text" id="laporanAlamat" class="form-input" placeholder="Contoh: Jl. Pahlawan No. 45, dekat jembatan" required>
+                </div>
+              </div>
+
+              <div class="map-picker-card">
+                <div class="map-picker-topbar">
+                  <span>Klik pada peta Kota Samarinda untuk menentukan titik lokasi laporan yang akurat</span>
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="resetTitikPusatSamarinda()">Pusatkan Samarinda</button>
+                </div>
+                <div id="mapPickerCanvas" class="map-picker-view"></div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Unggah Foto Kejadian (Maks. 10MB) *</label>
+                <div class="dropzone-box" id="dropzoneBox" onclick="document.getElementById('fotoInputFile').click()">
+                  <input type="file" id="fotoInputFile" accept="image/jpeg,image/png,image/heic,image/jpg" style="display:none;" onchange="tanganiUnggahFoto(this)">
+                  <div class="dropzone-title">Pilih atau Seret Foto Kerusakan</div>
+                  <div class="dropzone-sub">Mendukung format JPG, PNG, atau HEIC (Maksimal 10MB)</div>
+                  <div id="dropzonePreview" class="dropzone-preview">
+                    <img id="previewImgElement" src="" alt="Preview Bukti Foto">
+                    <div>
+                      <div id="previewFileName" style="font-weight:700; font-size:0.85rem;"></div>
+                      <div id="previewFileSize" style="font-size:0.75rem; color:var(--color-neutral-muted);"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="form-actions-row">
+              <button type="button" class="btn btn-secondary" onclick="bukaHalaman('beranda')">Kembali</button>
+              <button type="submit" class="btn btn-primary" id="btnSubmitLaporan">
+                <span>Kirim Laporan Resmi</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== HALAMAN SUKSES ==================== -->
+    <div id="view-laporan-sukses" class="view-section">
+      <div class="container">
+        <div class="success-page-card">
+          <div class="success-check-icon">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </div>
+
+          <h2 class="success-card-title">Laporan Berhasil Terkirim!</h2>
+          <p class="success-card-subtitle">Terima kasih atas kontribusi nyata Anda menjaga keasrian Kota Samarinda.</p>
+
+          <div class="success-summary-box">
+            <div class="summary-row">
+              <span class="summary-label">Nomor Laporan:</span>
+              <span class="summary-value" id="suksesNomorLaporan"></span>
+            </div>
+
+            <div class="summary-row">
+              <span class="summary-label">Waktu Pengiriman:</span>
+              <span class="summary-value" id="suksesWaktuLaporan"></span>
+            </div>
+
+            <div class="summary-row">
+              <span class="summary-label">Kategori Masalah:</span>
+              <span class="summary-value" id="suksesKategoriLaporan"></span>
+            </div>
+
+            <div class="summary-row">
+              <span class="summary-label">Lokasi Wilayah:</span>
+              <span class="summary-value" id="suksesLokasiLaporan"></span>
+            </div>
+          </div>
+
+          <div class="next-steps-container">
+            <div class="next-steps-title">Langkah Berikutnya:</div>
+            <div class="next-step-row">
+              <div class="next-step-number">1</div>
+              <div>
+                <div class="next-step-title">Verifikasi Admin</div>
+                <div class="next-step-desc">Validasi bukti foto dan lokasi dalam waktu maks. 24 jam oleh tim DLH Samarinda.</div>
+              </div>
+            </div>
+
+            <div class="next-step-row">
+              <div class="next-step-number">2</div>
+              <div>
+                <div class="next-step-title">Koordinasi Instansi</div>
+                <div class="next-step-desc">Laporan diteruskan ke Dinas terkait untuk persiapan penanganan dan logistik lapangan.</div>
+              </div>
+            </div>
+
+            <div class="next-step-row">
+              <div class="next-step-number">3</div>
+              <div>
+                <div class="next-step-title">Tindak Lanjut Lapangan</div>
+                <div class="next-step-desc">Petugas dan armada dikerahkan ke lokasi untuk pembersihan atau perbaikan.</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="bukaHalaman('laporan-saya')">Pantau Laporan Saya</button>
+            <button class="btn btn-secondary" onclick="bukaHalaman('beranda')">Kembali Ke Beranda</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====================LAPORAN SAYA ==================== -->
+    <div id="view-laporan-saya" class="view-section">
+<div class="reports-top">
+
+  <div class="container section">
+
+    <div class="user-stats-strip">
+
+      <div class="mini-stat-card">
+        <div>
+          <div class="mini-stat-val" id="myTotalCount">0</div>
+          <div class="mini-stat-title">Total Laporan</div>
+        </div>
+      </div>
+
+      <div class="mini-stat-card">
+        <div>
+          <div class="mini-stat-val" id="mySelesaiCount">0</div>
+          <div class="mini-stat-title">Selesai Ditangani</div>
+        </div>
+      </div>
+
+      <div class="mini-stat-card">
+        <div>
+          <div class="mini-stat-val" id="myDiprosesCount">0</div>
+          <div class="mini-stat-title">Sedang Diproses</div>
+        </div>
+      </div>
+
+      <div class="mini-stat-card">
+        <div>
+          <div class="mini-stat-val" id="myMenungguCount">0</div>
+          <div class="mini-stat-title">Menunggu Verifikasi</div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="reports-curve-divider">
+    <svg viewBox="0 0 1440 80" preserveAspectRatio="none">
+      <path
+        d="M0,45
+           C180,20 330,15 520,35
+           C700,55 850,60 1040,35
+           C1210,12 1320,15 1440,40
+           L1440,80
+           L0,80 Z"
+        fill="#FFFFFF">
+      </path>
+    </svg>
+  </div>
+
+</div>
+
+        <div class="filter-bar-card">
+          <div class="filter-search-box">
+            <input type="text" id="myReportSearchInput" class="form-input" style="padding:10px 14px;" placeholder="Cari laporan berdasarkan ID, lokasi, deskripsi..." oninput="filterLaporanSaya()">
+          </div>
+          <select id="myReportKategoriFilter" class="form-select" style="width:200px; padding:10px 14px;" onchange="filterLaporanSaya()">
+            <option value="Semua">Semua Kategori</option>
+          </select>
+          <select id="myReportStatusFilter" class="form-select" style="width:200px; padding:10px 14px;" onchange="filterLaporanSaya()">
+            <option value="Semua">Semua Status</option>
+            <option value="Menunggu Verifikasi">Menunggu Verifikasi</option>
+            <option value="Terverifikasi">Terverifikasi</option>
+            <option value="Diteruskan">Diteruskan</option>
+            <option value="Sedang Ditangani">Sedang Ditangani</option>
+            <option value="Selesai">Selesai</option>
+            <option value="Ditolak">Ditolak</option>
+          </select>
+        </div>
+
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ID Laporan</th>
+                <th>Kategori</th>
+                <th>Deskripsi Kejadian</th>
+                <th>Lokasi Wilayah</th>
+                <th>Tanggal</th>
+                <th>Status Laporan</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="myReportsTableBody">
+              <!-- Populated via script.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== DETAIL LAPORAN ==================== -->
+    <div id="view-detail-laporan" class="view-section">
+      <div class="container section">
+
+        <div class="detail-top-nav">
+          <button type="button" class="btn-kembali" onclick="kembaliDariDetail()">
+            <span class="btn-kembali-ikon" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </span>
+            <span>Kembali ke daftar laporan</span>
+          </button>
+          <button type="button" class="btn-bagikan" onclick="bagikanLaporan()" aria-label="Bagikan laporan">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+            <span>Bagikan</span>
+          </button>
+        </div>
+
+        <div style="margin-bottom:24px;">
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+            <span class="report-id" id="detailReportId" style="font-size:1.1rem; color:var(--color-primary);">#ER-1024</span>
+            <span class="status-badge" id="detailReportStatus">Sedang Ditangani</span>
+            <span style="font-size:0.84rem; color:var(--color-neutral-muted);" id="detailReportDate">Dilaporkan: 24 Okt 2026 • 09:20 WITA</span>
+          </div>
+          <h1 class="section-title text-left" id="detailReportTitle" style="font-size:1.9rem; margin-bottom:0;">
+            Penumpukan Limbah Plastik Saluran Irigasi
+          </h1>
+        </div>
+
+        <div class="detail-main-layout"><div>
+
+            <div class="detail-photo-card" id="detailPhotoContainer"></div>
+
+            <div style="margin-bottom:28px;">
+              <h3 style="font-size:1rem; font-weight:800; text-transform:uppercase; letter-spacing:0.04em; color:var(--color-neutral-muted); margin-bottom:10px;">
+                Apa yang terjadi
+              </h3>
+              <p id="detailReportDesc" style="font-size:0.96rem; line-height:1.7; color:var(--color-neutral-dark); background:var(--color-bg-light); padding:20px; border-radius:var(--radius-md); border:1px solid var(--color-border);"></p>
+            </div>
+
+            <div>
+              <h3 style="font-size:1rem; font-weight:800; text-transform:uppercase; letter-spacing:0.04em; color:var(--color-neutral-muted); margin-bottom:10px;">
+                Lokasinya di mana
+              </h3>
+              <div style="display:flex; gap:14px; margin-bottom:12px;">
+                <span class="filter-chip" id="detailLatChip">Lat: -0.502106</span>
+                <span class="filter-chip" id="detailLngChip">Lng: 117.153709</span>
+              </div>
+              <p id="detailAddress" style="font-size:0.92rem; font-weight:600; color:var(--color-neutral-dark); margin-bottom:14px;"></p>
+              
+              <div id="detailMiniMap" style="height:220px; border-radius:var(--radius-lg); overflow:hidden; border:1px solid var(--color-border);"></div>
+            </div>
+          </div>
+
+          <div>
+            <div class="officer-notes-box">
+              <div style="font-size:0.75rem; font-weight:800; text-transform:uppercase; letter-spacing:0.05em; color:#A5D6A7; margin-bottom:10px;">
+                Catatan dari petugas
+              </div>
+              <blockquote id="detailOfficerNotes">
+                "Tim DLH sudah survei ke lokasi. Armada kebersihan sedang dikirim untuk mengangkut sampah dan membersihkan saluran."
+              </blockquote>
+              <div class="officer-author" id="detailOfficerAuthor">— DLH Samarinda</div>
+            </div>
+
+            <div class="timeline-card">
+              <h3 class="timeline-title">Sudah sampai mana laporannya?</h3>
+              <div class="timeline-list" id="detailTimelineList">
+              </div>
+            </div>
+
+            <div style="background:var(--color-bg-light); border:1px solid var(--color-border); border-radius:var(--radius-lg); padding:20px;">
+              <div style="font-size:0.75rem; font-weight:800; text-transform:uppercase; color:var(--color-neutral-muted); margin-bottom:6px;">
+                Dilaporkan oleh
+              </div>
+              <div style="font-size:0.92rem; font-weight:700; color:var(--color-neutral-dark);" id="detailReporterName">
+                Nama pelapor
+              </div>
+              <div style="font-size:0.78rem; color:var(--color-neutral-muted); margin-top:4px;">
+                Data diri pelapor, termasuk NIK, dijaga kerahasiaannya sesuai Kebijakan Privasi EcoReport.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ==================== TENTANG KAMI ==================== -->
+    <div id="view-tentang-kami" class="view-section">
+      <div class="container section">
+        <div class="about-hero text-center">
+          <h1 class="section-title">Misi Mulia EcoReport</h1>
+          <p class="section-subtitle">
+            EcoReport lahir sebagai jembatan sinergis dan transparan antara masyarakat <strong>Kota Samarinda</strong> dengan dinas lingkungan pemerintahan setempat. Kami mengonversi suara pengaduan masyarakat menjadi aksi pemetaan koordinat spasial real-time yang memicu tindakan nyata di lapangan, demi mitigasi degradasi ekologis Samarinda yang komprehensif.
+          </p>
+        </div>
+
+        <div style="margin-bottom:28px;">
+          <h2 style="font-size:1.4rem; font-weight:800; color:var(--color-neutral-dark); text-align:center; margin-bottom:24px;">
+            Prinsip Kerja Berkelanjutan
+          </h2>
+          <div class="principles-grid">
+            <div class="principle-card">
+              <div class="principle-num">01</div>
+              <h3 class="principle-name">Report</h3>
+              <p class="principle-desc">Warga melaporkan indikasi pelanggaran atau kerusakan ekologis dengan data dan bukti valid.</p>
+            </div>
+            <div class="principle-card">
+              <div class="principle-num">02</div>
+              <h3 class="principle-name">Location</h3>
+              <p class="principle-desc">Menyertakan titik koordinat geografis akurat di wilayah Samarinda demi presisi pengerjaan.</p>
+            </div>
+            <div class="principle-card">
+              <div class="principle-num">03</div>
+              <h3 class="principle-name">Verification</h3>
+              <p class="principle-desc">Tim verifikator memvalidasi laporan publik demi menghalau berita palsu atau duplikasi.</p>
+            </div>
+            <div class="principle-card">
+              <div class="principle-num">04</div>
+              <h3 class="principle-name">Action</h3>
+              <p class="principle-desc">Diteruskan langsung ke dinas operasional Kota Samarinda (DLH, PUPR, BPBD) untuk dituntaskan.</p>
+            </div>
+            <div class="principle-card">
+              <div class="principle-num">05</div>
+              <h3 class="principle-name">Monitoring</h3>
+              <p class="principle-desc">Selesainya penanganan dipublikasikan kembali pada peta demi transparansi kepada warga.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="about-cards-2col">
+          <div class="about-feature-box">
+            <h3 style="font-size:1.2rem; font-weight:800; margin-bottom:12px; color:var(--color-neutral-dark);">
+              Verifikasi Publik Mandiri
+            </h3>
+            <p style="font-size:0.92rem; color:var(--color-neutral-dark); line-height:1.65;">
+              Setiap laporan yang masuk akan disaring dan ditinjau secara teliti oleh tim verifikasi EcoReport dalam kurun waktu 1x24 jam. Ini menjamin akurasi data yang diteruskan ke Instansi Pemerintah Kota Samarinda.
+            </p>
+          </div>
+
+          <div class="about-feature-box dark">
+            <h3 style="font-size:1.2rem; font-weight:800; margin-bottom:12px; color:#A5D6A7;">
+              Dampak Kolektif Nyata
+            </h3>
+            <p style="font-size:0.92rem; color:rgba(255,255,255,255); line-height:1.65;">
+              Hingga tahun 2026, EcoReport telah memfasilitasi penanganan timbulan sampah liar, pembersihan bantaran Sungai Karang Mumus dan anak sungai Mahakam, serta respons cepat genangan banjir di berbagai titik Kota Samarinda.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====================LOGIN ADMIN  ==================== -->
+    <div id="view-admin-login" class="view-section">
+      <div class="login-split-page">
+        <div class="login-hero-banner" style="background:#1E3D27;">
+          <h2 class="login-hero-quote">
+            Sistem Koordinasi Penyelamatan Lingkungan<br>(Kota Samarinda)
+          </h2>
+          <p class="login-hero-sub">
+            Setiap keputusan validasi laporan menentukan respons cepat dinas dalam menanggulangi kerusakan ekologi secara terukur dan transparan.
+          </p>
+        </div>
+
+        <div class="login-form-area">
+          <div class="login-card-inner">
+            <div style="font-size:0.75rem; font-weight:800; letter-spacing:0.05em; color:var(--color-secondary); margin-bottom:6px;">
+              PORTAL PETUGAS KEDINASAN
+            </div>
+            <h2 class="login-card-title">Masuk Portal Petugas</h2>
+            <p class="login-card-sub">Gunakan email kedinasan resmi (@ecoreport.go.id atau admin@ecoreport.com) untuk melanjutkan akses verifikasi sistem.</p>
+
+            <form onsubmit="event.preventDefault(); prosesLoginAdmin();">
+              <div class="form-group">
+                <label class="form-label">EMAIL DINAS</label>
+                <input type="email" id="adminLoginEmail" class="form-input" value="admin@ecoreport.com" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">PASSWORD SECURE</label>
+                <input type="password" id="adminLoginPassword" class="form-input" value="admin123" required>
+              </div>
+
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:20px; font-size:0.84rem; color:var(--color-neutral-muted);">
+                <input type="checkbox" id="ingatAdminSession" checked>
+                <label for="ingatAdminSession">Ingat sesi login saya di komputer dinas ini</label>
+              </div>
+
+              <button type="submit" class="btn btn-primary" style="width:100%;">
+                <span>Masuk Sebagai Petugas</span>
+              </button>
+            </form>
+
+            <div style="margin-top:20px; background:#FFF8E1; border:1px solid #FFE082; padding:12px; border-radius:var(--radius-md); font-size:0.78rem; color:#856404;">
+              <strong>PENTING:</strong> Akses sistem ini dipantau ketat untuk kebutuhan audit integritas publik Pemkot Samarinda. Dilarang membagikan akun verifikasi.
+            </div>
+
+            <div style="margin-top:20px; text-align:center;">
+              <a href="#" onclick="bukaHalaman('beranda'); return false;" style="font-size:0.82rem; color:var(--color-neutral-muted);">
+                ← Kembali ke Halaman Warga
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====================  PORTAL ADMIN LAYOUT ==================== -->
+    <div id="view-admin-portal" class="view-section">
+      <div class="admin-wrapper">
+        <!-- Admin Sidebar -->
+        <aside class="admin-sidebar">
+          <div class="admin-sidebar-brand" onclick="bukaHalaman('beranda')">
+            <div>
+              <div style="font-size:1.1rem; font-weight:800; letter-spacing:-0.02em;">EcoReport</div>
+              <div style="font-size:0.68rem; color: #000; letter-spacing:0.05em;">PORTAL PETUGAS SAMARINDA</div>
+            </div>
+          </div>
+
+          <nav class="admin-sidebar-nav">
+            <div class="admin-nav-item active" data-admin-tab="dashboard" onclick="bukaAdminSubHalaman('dashboard')">
+              <span>Dashboard</span>
+            </div>
+
+            <div class="admin-nav-item" data-admin-tab="verifikasi" onclick="bukaAdminSubHalaman('verifikasi')">
+              <span>Verifikasi Admin</span>
+              <span class="admin-nav-badge" id="adminSidebarBadgeCount">0</span>
+            </div>
+
+            <div class="admin-nav-item" data-admin-tab="laporan" onclick="bukaAdminSubHalaman('laporan')">
+              <span>Daftar Laporan</span>
+            </div>
+
+            <div class="admin-nav-item" data-admin-tab="peta" onclick="bukaAdminSubHalaman('peta')">
+              <span>Peta Admin</span>
+            </div>
+
+            <div class="admin-nav-item" data-admin-tab="pengaturan" onclick="bukaAdminSubHalaman('pengaturan')">
+              <span>Pengaturan Pengguna</span>
+            </div>
+
+            <div class="admin-nav-item-portal" style="margin-top:auto; border: 1px solid #2E7D32; background-color: #1E3D27;" onclick="bukaHalaman('beranda')">
+              <span>Ke Portal Warga</span>
+            </div>
+          </nav>
+
+          <div class="admin-sidebar-user">
+            <div class="user-avatar" id="adminOfficerAvatar" style="background:#FFFFFF; color:#1E3D27;">HW</div>
+            <div>
+              <div class="admin-officer-name">Ahmad Fajar Novia</div>
+              <div class="admin-officer-role">Verifikator Madya DLH Samarinda</div>
+            </div>
+          </div>
+        </aside>
+
+        <!-- Admin Main -->
+        <div class="admin-main">
+          <div class="admin-topbar">
+            <div>
+              <h2 class="admin-topbar-title" id="adminTopbarTitle">Dashboard Overview</h2>
+              <div style="font-size:0.8rem; color:var(--color-neutral-muted);">Ringkasan pemantauan real time laporan warga Kota Samarinda</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:16px;">
+                <span class="admin-date-badge" id="adminCurrentDateBadge">Hari ini: -</span>
+            </div>
+          </div>
+
+          <div class="admin-content-pad">
+            <div id="admin-sub-dashboard" class="admin-subview">
+              <div class="admin-kpi-grid">
+                <div class="kpi-card">
+                  <div class="kpi-card-title">Total Laporan</div>
+                  <div class="kpi-card-num" id="kpiTotalLaporan">0</div>
+                  <div class="kpi-card-sub" style="color:var(--color-secondary);"> laporan baru</div>
+                </div>
+
+                <div class="kpi-card">
+                  <div class="kpi-card-title">Laporan Baru</div>
+                  <div class="kpi-card-num" id="kpiMenungguVerifikasi" style="color:#1E3D27;">0</div>
+                  <div class="kpi-card-sub">Menunggu verifikasi</div>
+                </div>
+
+                <div class="kpi-card">
+                  <div class="kpi-card-title">Diverifikasi</div>
+                  <div class="kpi-card-num" id="kpiDiverifikasi" style="color:#1E3D27;">0</div>
+                  <div class="kpi-card-sub">Telah dipetakan</div>
+                </div>
+
+                <div class="kpi-card">
+                  <div class="kpi-card-title">Sedang Ditangani</div>
+                  <div class="kpi-card-num" id="kpiSedangDitangani" style="color:#1E3D27;">0</div>
+                  <div class="kpi-card-sub">Koordinasi dinas</div>
+                </div>
+
+                <div class="kpi-card">
+                  <div class="kpi-card-title">Selesai</div>
+                  <div class="kpi-card-num" id="kpiSelesai" style="color:#1E3D27;">0</div>
+                  <div class="kpi-card-sub">Penanganan tuntas</div>
+                </div>
+
+                <div class="kpi-card">
+                  <div class="kpi-card-title">Ditolak</div>
+                  <div class="kpi-card-num" id="kpiDitolak" style="color:#1E3D27;">0</div>
+                  <div class="kpi-card-sub">Tidak valid / duplikat</div>
+                </div>
+              </div>
+
+              <div class="chart-card">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                  <h3 class="chart-card-title" style="margin-bottom:0;">Aktivitas Laporan Masuk Terbaru</h3>
+                  <button class="btn btn-secondary btn-sm" onclick="bukaAdminSubHalaman('laporan')">Lihat Semua</button>
+                </div>
+                <div class="data-table-container">
+                  <table class="data-table">
+                    <thead>
+                      <tr>
+                        <th>ID Laporan</th>
+                        <th>Kategori</th>
+                        <th>Deskripsi Singkat</th>
+                        <th>Kecamatan</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody id="adminRecentActivityTableBody">
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div id="admin-sub-verifikasi" class="admin-subview" style="display:none;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+                <div style="display:flex; gap:12px; align-items:center; flex:1;">
+                  <input type="text" id="verifySearchInput" class="form-input" style="max-width:320px;" placeholder="Cari laporan berdasarkan ID, lokasi..." oninput="filterAntreanVerifikasi()">
+                  <select id="verifyCategoryFilter" class="form-select" style="max-width:200px;" onchange="filterAntreanVerifikasi()">
+                    <option value="Semua">Semua Kategori</option>
+                  </select>
+                </div>
+                <div class="status-badge status-menunggu" style="font-size:0.82rem; padding:6px 14px;" id="verifyCounterBadge">
+                  0 Laporan Antrean
+                </div>
+              </div>
+              <div class="admin-verify-grid" id="adminVerifyGrid">
+              </div>
+            </div>
+
+            <div id="admin-sub-verifikasi-detail" class="admin-subview" style="display:none;">
+              <div style="margin-bottom:16px;">
+                <button class="btn btn-secondary btn-sm" onclick="bukaAdminSubHalaman('verifikasi')">
+                  Kembali ke Antrean Verifikasi
+                </button>
+              </div>
+
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+                <h3 style="font-size:1.4rem; font-weight:800; color:var(--color-neutral-dark);" id="vDetailTitle">Detail Laporan #ER-1025</h3>
+                <span class="status-badge status-menunggu">Antrean • Perlu Verifikasi</span>
+              </div>
+
+              <div class="verify-detail-layout">
+                <div>
+                  <div class="chart-card" style="margin-bottom:20px;">
+                    <h4 style="font-size:1rem; font-weight:700; margin-bottom:12px;">Berkas Bukti Kejadian</h4>
+                    <div id="vDetailPhotoContainer" style="height:240px; border-radius:var(--radius-md); overflow:hidden; background:#E2ECE5; margin-bottom:14px;"></div>
+                    <div style="font-size:0.8rem; color:var(--color-neutral-muted);" id="vDetailMetaEXIF">
+                      Unggahan Berkas Bukti • Terverifikasi Spasial Samarinda
+                    </div>
+                  </div>
+
+                  <div class="chart-card" style="margin-bottom:20px;">
+                    <h4 style="font-size:1rem; font-weight:700; margin-bottom:8px;">Deskripsi Masalah dari Warga:</h4>
+                    <p id="vDetailDesc" style="font-size:0.92rem; line-height:1.6; color:var(--color-neutral-dark);"></p>
+                  </div>
+
+                  <div class="chart-card">
+                    <h4 style="font-size:1rem; font-weight:700; margin-bottom:12px;">Profil Pelapor (Rahasia)</h4>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:0.86rem;">
+                      <div>
+                        <span style="color:var(--color-neutral-muted);">Nama Lengkap:</span>
+                        <div style="font-weight:700;" id="vDetailPelaporNama">Anna Maria</div>
+                      </div>
+                      <div>
+                        <span style="color:var(--color-neutral-muted);">NIK Validasi:</span>
+                        <div style="font-weight:700;" id="vDetailPelaporNIK">64720219********</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="chart-card" style="margin-bottom:20px;">
+                    <h4 style="font-size:1rem; font-weight:700; margin-bottom:10px;">Verifikasi Peta Lokasi Samarinda</h4>
+                    <div id="vDetailMapContainer" style="height:180px; border-radius:var(--radius-md); overflow:hidden; border:1px solid var(--color-border); margin-bottom:10px;"></div>
+                    <div id="vDetailLocationCoords" style="font-size:0.82rem; font-weight:600; color:var(--color-primary);"></div>
+                  </div>
+
+                  <div class="verify-checklist-card">
+                    <h4 style="font-size:1rem; font-weight:700; margin-bottom:12px;">Validasi Kelayakan Laporan</h4>
+                    <label class="checklist-item">
+                      <input type="checkbox" class="checklist-checkbox" checked id="chkFotoValid">
+                      <span>Bukti foto jelas &amp; sesuai aduan</span>
+                    </label>
+                    <label class="checklist-item">
+                      <input type="checkbox" class="checklist-checkbox" checked id="chkLokasiAkurat">
+                      <span>Koordinat lokasi berada di Kota Samarinda</span>
+                    </label>
+                    <label class="checklist-item">
+                      <input type="checkbox" class="checklist-checkbox" checked id="chkNonDuplikat">
+                      <span>Bukan laporan duplikat / berulang</span>
+                    </label>
+                    <label class="checklist-item">
+                      <input type="checkbox" class="checklist-checkbox" checked id="chkUnsurEkologi">
+                      <span>Mengandung unsur pelanggaran lingkungan hidup</span>
+                    </label>
+
+                    <div style="margin-top:18px;">
+                      <label class="form-label" for="vDinasSelect">Tugaskan Dinas Terkait:</label>
+                      <select id="vDinasSelect" class="form-select">
+                        <option value="Dinas Lingkungan Hidup (DLH) Kota Samarinda">Dinas Lingkungan Hidup (DLH) Kota Samarinda</option>
+                        <option value="Dinas Pekerjaan Umum dan Penataan Ruang (PUPR) Samarinda">Dinas PUPR Kota Samarinda</option>
+                        <option value="Badan Penanggulangan Bencana Daerah (BPBD) Samarinda">BPBD Kota Samarinda</option>
+                        <option value="Satpol PP Kota Samarinda">Satpol PP Kota Samarinda</option>
+                      </select>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:10px; margin-top:20px;">
+                      <button class="btn btn-primary" onclick="konfirmasiVerifikasiLaporan()" style="width:100%;">
+                        Verifikasi &amp; Publikasikan Laporan
+                      </button>
+                      <button class="btn btn-danger" onclick="bukaModalTolakLaporan(currentVerifId)" style="width:100%;">
+                        Tolak Pengaduan
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Admin Subview: Kelola Semua Laporan  -->
+            <div id="admin-sub-laporan" class="admin-subview" style="display:none; padding:0;">
+              <!-- Top Metric Strip (latar hijau sama seperti halaman Laporan Saya) -->
+              <div class="admin-reports-top">
+              <div class="user-stats-strip">
+                <div class="mini-stat-card">
+                  <div>
+                    <div class="mini-stat-val" id="kelolaTotalAktif">0</div>
+                    <div class="mini-stat-title">Total Laporan Aktif</div>
+                  </div>
+                </div>
+                <div class="mini-stat-card">
+                  <div>
+                    <div class="mini-stat-val" id="kelolaMenunggu">0</div>
+                    <div class="mini-stat-title">Menunggu Verifikasi</div>
+                  </div>
+                </div>
+                <div class="mini-stat-card">
+                  <div>
+                    <div class="mini-stat-val" id="kelolaDiproses">0</div>
+                    <div class="mini-stat-title">Sedang Diproses</div>
+                  </div>
+                </div>
+                <div class="mini-stat-card">
+                  <div>
+                    <div class="mini-stat-val" id="kelolaTuntas">0</div>
+                    <div class="mini-stat-title">Tuntas Ditangani</div>
+                  </div>
+                </div>
+              </div>
+              </div>
+
+              <!-- Filter Bar & Wilayah -->
+              <div class="chart-card" style="margin-bottom:20px; padding:18px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:14px; flex-wrap:wrap;">
+
+                <input
+                  type="text"
+                  id="kelolaSearchInput"
+                  class="form-input"
+                  style="flex:1; min-width:240px;"
+                  placeholder="Cari berdasarkan ID Laporan, Pelapor, Kata Kunci..."
+                  oninput="filterSemuaLaporanAdmin()"
+                >
+
+                <select id="kelolaCategorySelect" class="form-select" style="width:200px;" onchange="filterSemuaLaporanAdmin()">
+                  <option value="Semua">Semua Kategori</option>
+                </select>
+
+                <select id="kelolaStatusSelect" class="form-select" style="width:200px;" onchange="filterSemuaLaporanAdmin()">
+                  <option value="Semua">Semua Status</option>
+                  <option value="Menunggu Verifikasi">Menunggu Verifikasi</option>
+                  <option value="Terverifikasi">Terverifikasi</option>
+                  <option value="Diteruskan">Diteruskan</option>
+                  <option value="Sedang Ditangani">Sedang Ditangani</option>
+                  <option value="Selesai">Selesai</option>
+                  <option value="Ditolak">Ditolak</option>
+                </select>
+
+                <button class="btn btn-secondary btn-sm" onclick="eksporLaporanCSV()">
+                   Ekspor Laporan
+                </button>
+
+              </div>
+
+                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                  <span style="font-size:0.75rem; font-weight:800; text-transform:uppercase; color:var(--color-neutral-muted);">Wilayah Kerja:</span>
+                  <div class="filter-chips-row" id="adminDistrictChips">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Data Table -->
+              <div class="data-table-container">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>ID Laporan</th>
+                      <th>Kategori</th>
+                      <th>Deskripsi Aduan</th>
+                      <th>Lokasi Wilayah</th>
+                      <th>Status</th>
+                      <th>Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody id="adminAllReportsTableBody">
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div id="admin-sub-peta" class="admin-subview" style="display:none;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:12px;">
+                <input type="text" id="adminMapSearchInput" class="form-input" style="max-width:340px;" placeholder="Cari lokasi koordinat atau kecamatan Samarinda..." oninput="filterPetaAdmin()">
+                <div class="filter-chips-row" id="adminMapStatusChips">
+                  <button class="filter-chip active" onclick="aturFilterPetaAdmin('Semua')">Semua Status</button>
+                  <button class="filter-chip" onclick="aturFilterPetaAdmin('Menunggu Verifikasi')">Menunggu Verifikasi</button>
+                  <button class="filter-chip" onclick="aturFilterPetaAdmin('Sedang Ditangani')">Diproses Dinas</button>
+                  <button class="filter-chip" onclick="aturFilterPetaAdmin('Selesai')">Selesai</button>
+                </div>
+              </div>
+
+              <div class="map-canvas-container" style="height:550px; border-radius:var(--radius-lg); border:1px solid var(--color-border);" id="adminMapContainer">
+                <div id="adminGisView" class="map-gis-view"></div>
+
+                <div class="map-legend-card" style="bottom:28px; left:12px; right:auto;">
+                  <div class="legend-title">Status Tindak Lanjut</div>
+                  <div style="font-size:0.8rem; display:flex; flex-direction:column; gap:6px;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                      <span style="width:10px; height:10px; border-radius:50%; background:#F57F17;"></span>
+                      <span>Menunggu Verifikasi (<span id="legCountMenunggu">0</span>)</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                      <span style="width:10px; height:10px; border-radius:50%; background:#E65100;"></span>
+                      <span>Sedang Diproses (<span id="legCountDiproses">0</span>)</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                      <span style="width:10px; height:10px; border-radius:50%; background:#2E7D32;"></span>
+                      <span>Tuntas Ditangani (<span id="legCountTuntas">0</span>)</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                      <span style="width:10px; height:10px; border-radius:50%; background:#C62828;"></span>
+                      <span>Ditolak (<span id="legCountDitolak">0</span>)</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div id="admin-sub-pengaturan" class="admin-subview" style="display:none;">
+              <div style="display:block; width:100%;">
+                <div class="chart-card">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; gap:12px;">
+                    <h3 class="chart-card-title" style="margin-bottom:0;">Daftar Pengguna Sistem</h3>
+                    <input type="text" id="penggunaSearchInput" class="form-input" style="width:200px; padding:6px 12px; font-size:0.82rem;" placeholder="Cari nama, email, peran..." oninput="renderDaftarPengguna()">
+                  </div>
+
+                  <div class="data-table-container">
+                    <table class="data-table">
+                      <thead>
+                        <tr>
+                          <th>Nama</th>
+                          <th>Peran</th>
+                          <th>Telepon</th>
+                          <th>Total Laporan</th>
+                        </tr>
+                      </thead>
+                      <tbody id="penggunaTableBody">
+                        <tr><td colspan="4" style="text-align:center; padding:28px; color:var(--color-neutral-muted);">Memuat data pengguna…</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="site-footer" id="mainFooter">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand-col">
+          <div class="footer-brand">
+            <span class="brand-name footer-brand-name">EcoReport</span>
+          </div>
+          <p class="footer-description">
+            Platform pengawasan lingkungan terpadu masyarakat Kota Samarinda. Laporkan pelanggaran, jaga kelestarian, wujudkan ekosistem masa depan yang lebih hijau.
+          </p>
+          <div class="footer-coverage-badge">
+             <strong>Kota Samarinda, Kalimantan Timur</strong>
+          </div>
+        </div>
+
+        <div class="footer-col">
+          <h4 class="footer-heading">Layanan</h4>
+          <ul class="footer-links">
+            <li><a onclick="bukaHalaman('peta')">Peta Laporan</a></li>
+            <li><a onclick="bukaHalaman('buat-laporan')">Buat Laporan</a></li>
+            <li><a onclick="bukaHalaman('laporan-saya')">Laporan Saya</a></li>
+            <li><a onclick="bukaAdminSubHalaman('dashboard')">Portal Petugas</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4 class="footer-heading">Tentang EcoReport</h4>
+          <ul class="footer-links">
+            <li><a onclick="bukaHalaman('tentang-kami')">Misi EcoReport</a></li>
+            <li><a onclick="bukaHalaman('tentang-kami')">Prinsip Kerja</a></li>
+            <li><a onclick="bukaHalaman('buat-laporan')">Panduan Pengaduan</a></li>
+            <li><a onclick="bukaHalaman('peta')">Peta Wilayah Samarinda</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4 class="footer-heading">Kontak &amp; Dukungan</h4>
+
+          <div class="footer-contact-info">
+            <div class="contact-item">
+              <span>support@ecoreport.go.id</span>
+            </div>
+
+            <div class="contact-item">
+              <span>1234-ECO </span>
+            </div>
+
+            <div class="contact-item">
+              <span>Dinas Lingkungan Hidup Kota Samarinda</span>
+            </div>
+          </div>
+
+          <!-- Media Sosial -->
+          <div class="footer-social">
+            <a href="https://instagram.com/USERNAME"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram">
+              <i class="fab fa-instagram"></i>
+            </a>
+
+            <a href="https://youtube.com/@USERNAME"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="YouTube">
+              <i class="fab fa-youtube"></i>
+            </a>
+
+            <a href="https://tiktok.com/@USERNAME"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="TikTok">
+              <i class="fab fa-tiktok"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <strong>EcoReport (Kota Samarinda)</strong>
+        <div style="display:flex; gap:16px;">
+          <a href="#" onclick="tampilkanToast('Kebijakan Privasi: Identitas pelapor dilindungi'); return false;">Kebijakan Privasi</a>
+          <a href="#" onclick="tampilkanToast('Syarat & Ketentuan berlaku khusus Kota Samarinda'); return false;">Syarat &amp; Ketentuan</a>
+          <a href="#" onclick="tampilkanToast('Peta Situs EcoReport Samarinda'); return false;">Peta Situs</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ====================  TOLAK LAPORAN =================== -->
+  <div id="modalTolakLaporan" class="modal-overlay">
+    <div class="modal-card">
+      <h3 class="modal-title" id="modalTolakTitle">Tolak Laporan</h3>
+      <p class="modal-sub">Sebutkan alasan penolakan secara jelas. Notifikasi akan terkirim otomatis ke pelapor.</p>
+
+      <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
+        <label class="checklist-item">
+          <input type="checkbox" class="checklist-checkbox" id="alasanFotoKurangJelas" checked>
+          <span>Foto bukti tidak valid / kurang jelas</span>
+        </label>
+        <label class="checklist-item">
+          <input type="checkbox" class="checklist-checkbox" id="alasanBukanSamarinda">
+          <span>Titik lokasi berada di luar batas wilayah Kota Samarinda</span>
+        </label>
+        <label class="checklist-item">
+          <input type="checkbox" class="checklist-checkbox" id="alasanBukanEkologi">
+          <span>Bukan masalah pelanggaran lingkungan hidup / kewenangan Pemkot</span>
+        </label>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="tolakCatatanVerifikator">Catatan Tambahan Verifikator:</label>
+        <textarea id="tolakCatatanVerifikator" class="form-textarea" rows="3" placeholder="Contoh: Foto buram dan objek kerusakan tidak terlihat jelas. Harap unggah ulang foto yang tajam."></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="tutupModalTolakLaporan()">Batalkan</button>
+        <button type="button" class="btn btn-danger" onclick="kirimPenolakanLaporan()">Ya, Tolak Laporan</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalGantiStatus" class="modal-overlay">
+    <div class="modal-card">
+      <h3 class="modal-title">Perbarui Status Penanganan</h3>
+      <p class="modal-sub" id="modalGantiStatusSub">Ubah tahapan tindak lanjut laporan aduan.</p>
+
+      <div class="form-group">
+        <label class="form-label" for="selectStatusTahapan">Pilih Status Baru:</label>
+        <select id="selectStatusTahapan" class="form-select">
+          <option value="Terverifikasi">Terverifikasi</option>
+          <option value="Diteruskan">Diteruskan ke Instansi Terkait</option>
+          <option value="Sedang Ditangani">Sedang Ditangani di Lapangan</option>
+          <option value="Selesai">Selesai Ditangani</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="inputCatatanPetugasUpdate">Catatan Progres Petugas (Opsional):</label>
+        <textarea id="inputCatatanPetugasUpdate" class="form-textarea" rows="2" placeholder="Contoh: Truk pengangkut sampah DLH telah tiba di lokasi."></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="tutupModalGantiStatus()">Batal</button>
+        <button type="button" class="btn btn-primary" onclick="simpanPerubahanStatusLaporan()">Simpan Status</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalWajibLogin" class="modal-overlay">
+    <div class="modal-card" style="max-width:440px; text-align:center;">
+      <h3 class="modal-title" style="margin-bottom:8px;">Wajib Masuk / Buat Akun Pelapor</h3>
+      <p class="modal-sub" style="font-size:0.9rem; line-height:1.6; margin-bottom:20px;">
+        Setiap pelapor wajib memiliki akun resmi untuk menjaga keaslian dan akuntabilitas laporan.
+      </p>
+
+      <div style="background:#F0F7F2; border-radius:var(--radius-md); padding:14px; margin-bottom:24px; text-align:left; font-size:0.82rem; color:#334155;">
+        <div style="font-weight:700; margin-bottom:4px; display:flex; align-items:center; gap:6px;"> Mengapa akun diperlukan?</div>
+        <ul style="margin:0; padding-left:18px; line-height:1.5;">
+          <li>Mencegah pengaduan palsu / spam di Samarinda</li>
+          <li>Memudahkan dinas mengonfirmasi progres tindak lanjut</li>
+          <li>Status laporan tersimpan permanen di akun Anda</li>
+        </ul>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <button type="button" class="btn btn-primary" onclick="tutupModalWajibLogin(); gantiTabAuth('login'); bukaHalaman('login');">
+          Masuk ke Akun Saya
+        </button>
+        <button type="button" class="btn btn-outline-primary" onclick="tutupModalWajibLogin(); gantiTabAuth('register'); bukaHalaman('login');"style="background:#F0F7F2; border:1.5px solid #1F6B3D; color:#1F6B3D; font-weight:600; ">
+          Daftar Akun Baru (Pelapor)
+        </button>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="tutupModalWajibLogin()" style="margin-top:4px;">
+          Batal
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
